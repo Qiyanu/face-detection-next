@@ -70,7 +70,7 @@ export default function Home() {
         initializeFaceLandmarker().catch(error => {
             console.error("Error initializing FaceLandmarker:", error);
         });
-    }, []);
+    }, );
 
     function enableSmileDetection(index) {
         setTimeout(() => {
