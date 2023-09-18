@@ -14,6 +14,7 @@ export default function Home() {
     const [faceIndexes, setFaceIndexes] = useState([]);
     const smileThreshold = 0.4;
     const smileFlagRef = useRef([]);
+    const smileCooldownDuration = 1000;
 
     useEffect(() => {
         async function initializeFaceLandmarker() {
@@ -69,13 +70,18 @@ export default function Home() {
         initializeFaceLandmarker().catch(error => {
             console.error("Error initializing FaceLandmarker:", error);
         });
-
     }, []);
+
+    function enableSmileDetection(index) {
+        setTimeout(() => {
+            smileFlagRef.current[index] = false;
+        }, smileCooldownDuration);
+    }
 
     function processResults(results) {
         const numFaces = results.faceBlendshapes.length;
 
-        setSmileCounts(prevCounts => {
+        setSmileCounts((prevCounts) => {
             const newCounts = [...prevCounts];
             while (newCounts.length < numFaces) {
                 newCounts.push(0);
@@ -88,25 +94,25 @@ export default function Home() {
         setFaceIndexes(newFaceIndexes);
 
         results.faceBlendshapes.forEach((face, index) => {
-            const mouthSmileLeft = face.categories.find(cat => cat.categoryName === 'mouthSmileLeft');
-            const mouthSmileRight = face.categories.find(cat => cat.categoryName === 'mouthSmileRight');
+            const mouthSmileLeft = face.categories.find((cat) => cat.categoryName === "mouthSmileLeft");
+            const mouthSmileRight = face.categories.find((cat) => cat.categoryName === "mouthSmileRight");
             const score = (mouthSmileLeft.score + mouthSmileRight.score) / 2;
 
-            setSmileScores(prevScores => {
+            setSmileScores((prevScores) => {
                 const newScores = [...prevScores];
                 newScores[index] = score;
                 return newScores;
             });
 
             if (score > smileThreshold && !smileFlagRef.current[index]) {
-                setSmileCounts(prevCounts => {
+                setSmileCounts((prevCounts) => {
                     const newCounts = [...prevCounts];
                     newCounts[index]++;
                     return newCounts;
                 });
                 smileFlagRef.current[index] = true;
-            } else if (score <= smileThreshold) {
-                smileFlagRef.current[index] = false;
+
+                enableSmileDetection(index);
             }
         });
     }
