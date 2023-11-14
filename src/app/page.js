@@ -14,6 +14,7 @@ export default function Home() {
     const [faceIndexes, setFaceIndexes] = useState([]);
     const smileThreshold = 0.4;
     const smileFlagRef = useRef([]);
+    const countFlagRef = useRef([]);
     const smileCooldownDuration = 1000;
 
     useEffect(() => {
@@ -74,7 +75,7 @@ export default function Home() {
 
     function enableSmileDetection(index) {
         setTimeout(() => {
-            smileFlagRef.current[index] = false;
+            countFlagRef.current[index] = false;
         }, smileCooldownDuration);
     }
 
@@ -85,6 +86,7 @@ export default function Home() {
             const newCounts = [...prevCounts];
             while (newCounts.length < numFaces) {
                 newCounts.push(0);
+                countFlagRef.current.push(false);
                 smileFlagRef.current.push(false);
             }
             return newCounts;
@@ -111,8 +113,11 @@ export default function Home() {
                     return newCounts;
                 });
                 smileFlagRef.current[index] = true;
-
+                countFlagRef.current[index] = true;
                 enableSmileDetection(index);
+            }
+            else if (score < smileThreshold && !countFlagRef.current[index]){
+                smileFlagRef.current[index] = false;
             }
         });
     }
