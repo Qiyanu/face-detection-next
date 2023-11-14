@@ -16,6 +16,7 @@ export default function Home() {
     const smileFlagRef = useRef([]);
     const countFlagRef = useRef([]);
     const smileCooldownDuration = 1000;
+    const [resetButtonClicked, setResetButtonClicked] = useState(false);
 
     useEffect(() => {
         async function initializeFaceLandmarker() {
@@ -79,6 +80,16 @@ export default function Home() {
         }, smileCooldownDuration);
     }
 
+    function handleResetButtonClick() {
+        setResetButtonClicked(true);
+    }
+
+    useEffect(() => {
+        if (resetButtonClicked) {
+            setSmileCounts((prevCounts) => prevCounts.map(() => 0));
+            setResetButtonClicked(false);
+        }
+    }, [resetButtonClicked]);
     function processResults(results) {
         const numFaces = results.faceBlendshapes.length;
 
@@ -143,6 +154,8 @@ export default function Home() {
                     </div>
                 ))}
             </div>
+
+            <button onClick={handleResetButtonClick}>Reset Smile Counts</button>
         </div>
     );
 }
